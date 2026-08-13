@@ -14,17 +14,16 @@ string baseUrl = configuration.GetSection("AIEndpoint").Value!;
 string apiKey = configuration.GetSection("AIApiKey").Value!;
 const string model = "glm-5.1";
 
-//await HttpClientCallLLMAsync();
+await HttpClientCallLLMAsync();
 
 //想看下请求和响应的内容，可以使用下面的拦截器
 //HttpClientInterceptor.StartInterception();
-await SDKCallLLMAsync(isStream: true);
+//await SDKCallLLMAsync(isStream: true);
 
 async Task HttpClientCallLLMAsync()
 {
     //生产要使用 HttpClientFactory
     using var httpClient = new HttpClient();
-    httpClient.BaseAddress = new Uri(baseUrl);
     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
     var jsonContent = JsonSerializer.Serialize(new
@@ -41,7 +40,7 @@ async Task HttpClientCallLLMAsync()
     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
     Console.WriteLine($"》》》请求内容：\r\n    {jsonContent}");
 
-    var response = await httpClient.PostAsync("chat/completions", content);
+    var response = await httpClient.PostAsync($"{baseUrl}/chat/completions", content);
     var responseBody = await response.Content.ReadAsStringAsync();
 
     Console.WriteLine($"》》》返回内容：\r\n    {responseBody}");
@@ -82,7 +81,7 @@ async Task SDKCallLLMAsync(bool isStream = false, bool isNeedReasoningContent = 
                 {
                     foreach (var item in update.Contents)
                     {
-                        if (item is TextReasoningContent textReasoning&& isNeedReasoningContent)
+                        if (item is TextReasoningContent textReasoning && isNeedReasoningContent)
                         {
                             Console.Write($"{textReasoning.Text}");
                         }
